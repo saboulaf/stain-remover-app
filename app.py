@@ -25,13 +25,13 @@ st.markdown("""
             text-align: right;
         }
 
-        /* יישור שדות קלט, תפריטים נפתחים (Selectbox) ותיבות טקסט */
+        /* יישור שדות קלט ותפריטים נפתחים */
         input, textarea, .stSelectbox, div[data-baseweb="select"], div[data-baseweb="base-input"] {
             direction: rtl !important;
             text-align: right !important;
         }
 
-        /* יישור הטיפים, הודעות שגיאה, אזהרה והצלחה לימין */
+        /* יישור הודעות מערכת */
         .stAlert, div[data-baseweb="notification"] {
             direction: rtl;
             text-align: right;
@@ -42,7 +42,7 @@ st.markdown("""
             width: 100%;
         }
 
-        /* יישור התוכן המוחזר מה-AI (Markdown) לימין */
+        /* יישור תוכן ה-Markdown */
         .stMarkdown, .stMarkdown p, .stMarkdown ul, .stMarkdown li {
             text-align: right !important;
             direction: rtl !important;
@@ -60,7 +60,7 @@ if not API_KEY:
 
 if API_KEY:
     try:
-        # ניקוי רווחים מיותרים והגדרת המפתח
+        # ניקוי רווחים והגדרת ה-API
         genai.configure(api_key=API_KEY.strip())
 
         st.subheader("1. פרטי הכתם")
@@ -75,17 +75,15 @@ if API_KEY:
         
         image = None
         if uploaded_file:
-            # המרה אוטומטית ל-RGB פותרת שגיאות של תמונות PNG עם שקיפות
+            # המרה ל-RGB כדי למנוע שגיאות שקיפות
             image = Image.open(uploaded_file).convert("RGB")
             st.image(image, caption="התמונה שהועלתה", use_column_width=True)
 
-        # לחצן הפעלה
         if st.button("🚀 איך מנקים את זה?", type="primary"):
             if not stain_text and not image:
                 st.warning("אנא רשמו ממה נגרם הכתם או העלו תמונה.")
             else:
                 with st.spinner("מנתח את הכתם ומכין הוראות ניקוי..."):
-                    # בניית הפרומפט למודל ה-AI
                     prompt = f"""
                     אתה מומחה להסרת כתמים וכביסה.
                     המשתמש מבקש עזרה בהסרת כתם.
@@ -95,10 +93,10 @@ if API_KEY:
                     - סוג הבד: {fabric_type}
                     
                     משימותיך:
-                    1. אם צורפה תמונה, נתח אותה וודא אם הכתם נראה מתאים לגורם שתואר (או זהה אותו בעצמך אם לא צוין).
+                    1. אם צורפה תמונה, נתח אותה וודא אם הכתם נראה מתאים לגורם שתואר.
                     2. ספק מדריך ברור, קצר ושלב-אחר-שלב להסרת הכתם.
-                    3. פרט אילו חומרים נדרשים (חומציות, סבון כלים, אלכוהול וכו').
-                    4. ציין ממה חובה להימנע כדי לא להרוס את הבד (למשל: מים חמים בכתמי דם).
+                    3. פרט אילו חומרים נדרשים.
+                    4. ציין ממה חובה להימנע כדי לא להרוס את הבד.
                     
                     החזר את התשובה בעברית תקנית, בפורמט מעוצב, ברור וידידותי.
                     """
@@ -107,33 +105,33 @@ if API_KEY:
                     if image:
                         inputs.append(image)
                     
-                    # רשימת דגמים אפשריים - המערכת תנסה אותם אחד-אחד עד שיצליח
-                    candidate_models = [
-                        'gemini-1.5-flash',
-                        'gemini-1.5-flash-latest',
-                        'gemini-2.0-flash',
-                        'gemini-1.5-pro',
-                        'models/gemini-1.5-flash'
+                    # --- זיהוי דינמי של המודלים הזמינים במפתח שלך ---
+                    available_models = [
+                        m.name for m in genai.list_models()
+                        if 'generateContent' in m.supported_generation_methods
                     ]
                     
-                    response = None
-                    last_error = None
-                    
-                    for model_name in candidate_models:
-                        try:
-                            model = genai.GenerativeModel(model_name)
-                            response = model.generate_content(inputs)
-                            if response and response.text:
+                    # לבחור מודל נתמך
+                    chosen_model_name = None
+                    for pref in ['flash', 'pro', 'gemini']:
+                        for name in available_models:
+                            if pref in name:
+                                chosen_model_name = name
                                 break
-                        except Exception as err:
-                            last_error = err
-                            continue
-                    
-                    if response:
+                        if chosen_model_name:
+                            break
+                            
+                    if not chosen_model_name and available_models:
+                        chosen_model_name = available_models[0]
+
+                    if chosen_model_name:
+                        model = genai.GenerativeModel(chosen_model_name)
+                        response = model.generate_content(inputs)
+                        
                         st.success("הנה מה שצריך לעשות:")
                         st.markdown(f"<div style='direction: rtl; text-align: right;'>{response.text}</div>", unsafe_allow_html=True)
                     else:
-                        st.error(f"אירעה שגיאה בחיבור למודלים. פרטים: {last_error}")
+                        st.error("לא נמצאו מודלים זמינים במפתח ה-API הזה. ודא שהמפתח הונפק מ-Google AI Studio.")
 
     except Exception as e:
         st.error(f"אירעה שגיאה בחיבור ל-AI: {e}")
