@@ -68,8 +68,11 @@ if API_KEY:
         # ניקוי רווחים מיותרים והגדרת המפתח
         genai.configure(api_key=API_KEY.strip())
         
-        # הגדרת המודל
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # הגדרת המודל - ניסיון שימוש במודל העדכני, עם גיבוי במקרה של שגיאת התחברות
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+        except Exception:
+            model = genai.GenerativeModel('gemini-1.5-pro')
 
         st.subheader("1. פרטי הכתם")
         stain_text = st.text_input("ממה נגרם הכתם? (לדוגמה: יין אדום, קפה, שמן):")
@@ -119,7 +122,7 @@ if API_KEY:
                     response = model.generate_content(inputs)
                     
                     st.success("הנה מה שצריך לעשות:")
-                    # עטיפת התשובה ב-DIV המאלץ כיוון RTL
+                    # עטיפת התשובה ב-DIV המאלץ כיוון RTL למקרה שהמודל מחזיר טקסט מבולגן
                     st.markdown(f"<div style='direction: rtl; text-align: right;'>{response.text}</div>", unsafe_allow_html=True)
 
     except Exception as e:
