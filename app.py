@@ -33,11 +33,11 @@ st.markdown("""
 
         /* כותרת הטופס */
         .form-header {
-            font-size: 1.3rem;
+            font-size: 2rem;
             font-weight: 800;
             color: #1e293b;
             margin-bottom: 25px;
-            text-align: right !important;
+            text-align: center !important;
             direction: rtl !important;
         }
 
