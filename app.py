@@ -3,18 +3,18 @@ import google.generativeai as genai
 from PIL import Image
 
 # הגדרת דף
-st.set_page_config(page_title="זיהוי וטיפול בכתמים", page_icon="🛡️", layout="centered")
+st.set_page_config(page_title="זיהוי וטיפול בכתמים", page_icon="🧺", layout="centered")
 
-# --- CSS מעוצב בסגנון GovID נקי ---
+# --- CSS מותאם אישית במדויק לפי צילום המסך ---
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap');
 
-        /* רקע ופונט */
+        /* רקע לבן נקי ופונט */
         html, body, .stApp {
             font-family: 'Assistant', sans-serif !important;
-            background-color: #eef3f8 !important;
-            color: #0f2b48 !important;
+            background-color: #ffffff !important;
+            color: #1e293b !important;
             direction: rtl;
             text-align: right;
         }
@@ -31,48 +31,73 @@ st.markdown("""
             max-width: 650px;
         }
 
-        /* כותרת ראשית */
-        .main-title {
-            text-align: center;
-            color: #0f2b48;
-            font-size: 2rem;
+        /* כותרת טופס ראשית (בדומה ל"פרטי הזדהות") */
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            font-size: 1.3rem;
             font-weight: 800;
-            margin-bottom: 20px;
+            color: #1e293b;
+            margin-bottom: 25px;
         }
 
-        /* כרטיסיה לבנה מרכזית */
-        .govid-card {
+        /* סגנון לייבלים עם כוכבית אדומה */
+        .req-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .req-asterisk {
+            color: #e11d48;
+            font-weight: bold;
+        }
+
+        /* שדות קלט עם קו תחתון בלבד (כמו בתמונה) */
+        div[data-baseweb="input"] input {
+            border: none !important;
+            border-bottom: 1.5px solid #64748b !important;
+            border-radius: 0px !important;
+            background-color: transparent !important;
+            padding-right: 0px !important;
+            box-shadow: none !important;
+        }
+
+        div[data-baseweb="select"] {
+            border: none !important;
+            border-bottom: 1.5px solid #64748b !important;
+            border-radius: 0px !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* עיצוב הלשוניות כפתורי בחירה (Pills) כמו בתמונה */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 10px;
+            background-color: transparent;
+            margin-bottom: 15px;
+        }
+        .stTabs [data-baseweb="tab"] {
             background-color: #ffffff;
-            border-radius: 12px;
-            padding: 28px;
-            box-shadow: 0 4px 16px rgba(15, 43, 72, 0.06);
-            border: 1px solid #dbe2ea;
-            margin-bottom: 20px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 20px;
+            color: #334155;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .stTabs [aria-selected="true"] {
+            background-color: #f39a1e !important;
+            border-color: #f39a1e !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 6px rgba(243, 154, 30, 0.3) !important;
         }
 
-        /* כותרות משנה בתוך הכרטיסיה */
-        .sub-title {
-            color: #0f2b48;
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        /* עיצוב שדות קלט בסגנון כחלחל-בהיר */
-        div[data-baseweb="input"], div[data-baseweb="select"] {
-            background-color: #f0f4f9 !important;
-            border: 1px solid #c5d3e2 !important;
-            border-radius: 8px !important;
-        }
-        
-        input {
-            color: #0f2b48 !important;
-            font-weight: 600 !important;
-        }
-
-        /* כפתור ראשי בכחול-נייבי */
+        /* כפתור ראשי בכתום בולט */
         .stButton button[kind="primary"] {
-            background-color: #004b87 !important;
+            background-color: #f39a1e !important;
             color: #ffffff !important;
             font-weight: 700 !important;
             font-size: 1.1rem !important;
@@ -80,30 +105,26 @@ st.markdown("""
             padding: 12px 24px !important;
             border: none !important;
             width: 100% !important;
-            box-shadow: 0 2px 6px rgba(0, 75, 135, 0.2) !important;
+            box-shadow: 0 3px 8px rgba(243, 154, 30, 0.3) !important;
             transition: all 0.2s ease !important;
+            margin-top: 15px;
         }
         .stButton button[kind="primary"]:hover {
-            background-color: #003662 !important;
+            background-color: #e08b12 !important;
         }
 
-        /* עיצוב הלשוניות (Tabs) */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            background-color: transparent;
-        }
-        .stTabs [data-baseweb="tab"] {
-            background-color: #f8fafc;
-            border: 1px solid #c5d3e2;
-            border-radius: 8px;
-            padding: 8px 16px;
-            color: #004b87;
-            font-weight: 600;
-        }
-        .stTabs [aria-selected="true"] {
-            background-color: #e8f1f9 !important;
-            border-color: #004b87 !important;
-            color: #004b87 !important;
+        /* תיבת תוצאה בסגנון תיבת ההוראות האפורה מהתמונה */
+        .instruction-box {
+            background-color: #f1f5f9;
+            border: 1px solid #94a3b8;
+            border-radius: 4px;
+            padding: 16px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #0f172a;
+            max-height: 350px;
+            overflow-y: auto;
+            margin-top: 20px;
         }
 
         .stAlert {
@@ -114,46 +135,42 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# כותרת העמוד
-st.markdown('<div class="main-title">זיהוי וטיפול בכתמים</div>', unsafe_allow_html=True)
+# כותרת סגנון "פרטי הזדהות"
+st.markdown('<div class="form-header">🧺 פרטי הכתם והבד</div>', unsafe_allow_html=True)
 
 # טעינת מפתח API
 API_KEY = st.secrets.get("GEMINI_API_KEY", "")
 if not API_KEY:
-    st.markdown('<div class="govid-card">', unsafe_allow_html=True)
-    API_KEY = st.text_input("🔑 הזן מפתח API של Gemini:", type="password")
-    st.markdown('</div>', unsafe_allow_html=True)
+    API_KEY = st.text_input("🔑 מפתח API (חובה) *", type="password")
 
 if API_KEY:
     try:
         genai.configure(api_key=API_KEY.strip())
 
-        # כרטיסיית הזנת הנתונים
-        st.markdown('<div class="govid-card">', unsafe_allow_html=True)
-        
-        st.markdown('<div class="sub-title">פרטי הכתם והבד</div>', unsafe_allow_html=True)
-        
-        stain_text = st.text_input(
-            "גורם הכתם:", 
-            placeholder="לדוגמה: יין אדום, קפה, שמן, דם..."
-        )
-        
+        # שדה 1: ממה נגרם הכתם
+        st.markdown('<div class="req-label"><span class="req-asterisk">*</span> ממה נגרם הכתם</div>', unsafe_allow_html=True)
+        stain_text = st.text_input("", placeholder="לדוגמה: יין אדום, קפה, שמן, דם...", label_visibility="collapsed")
+
+        # שדה 2: סוג הבד
+        st.markdown('<div class="req-label" style="margin-top: 15px;"><span class="req-asterisk">*</span> סוג הבד</div>', unsafe_allow_html=True)
         fabric_type = st.selectbox(
-            "סוג הבד:",
-            ["כותנה", "ג'ינס", "סינתטי (פוליאסטר)", "משי / עדין", "צמר", "לא בטוח/ה"]
+            "",
+            ["כותנה", "ג'ינס", "סינתטי (פוליאסטר)", "משי / עדין", "צמר", "לא בטוח/ה"],
+            label_visibility="collapsed"
         )
 
-        st.markdown('<div class="sub-title" style="margin-top: 15px;">תמונת הכתם</div>', unsafe_allow_html=True)
-        tab1, tab2 = st.tabs(["📁 העלאה מהגלריה", "📷 צילום במצלמה"])
+        # שדה 3: בחירת אמצעי צילום/העלאה (Pills כמו בתמונה)
+        st.markdown('<div class="req-label" style="margin-top: 20px;"><span class="req-asterisk">*</span> בחירת אמצעי קלט תמונה</div>', unsafe_allow_html=True)
+        tab1, tab2 = st.tabs(["באמצעות העלאת קובץ", "באמצעות מצלמה"])
         image_file = None
 
         with tab1:
-            uploaded_file = st.file_uploader("בחירת תמונה:", type=["jpg", "jpeg", "png"])
+            uploaded_file = st.file_uploader("בחירת תמונה:", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
             if uploaded_file:
                 image_file = uploaded_file
 
         with tab2:
-            camera_photo = st.camera_input("צילום הכתם:")
+            camera_photo = st.camera_input("צילום הכתם:", label_visibility="collapsed")
             if camera_photo:
                 image_file = camera_photo
 
@@ -162,8 +179,6 @@ if API_KEY:
             image = Image.open(image_file).convert("RGB")
             if image_file == uploaded_file:
                 st.image(image, caption="התמונה שנבחרה", use_column_width=True)
-
-        st.markdown('</div>', unsafe_allow_html=True)
 
         # כפתור הפעלה
         if st.button("חשב הוראות ניקוי", type="primary"):
@@ -224,10 +239,7 @@ if API_KEY:
                             continue
 
                     if response:
-                        st.markdown('<div class="govid-card">', unsafe_allow_html=True)
-                        st.markdown('<div class="sub-title" style="color: #004b87;">הנחיות לניקוי הכתם</div>', unsafe_allow_html=True)
-                        st.markdown(f"<div style='direction: rtl; text-align: right; line-height: 1.6;'>{response.text}</div>", unsafe_allow_html=True)
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="instruction-box"><b>הוראות ניקוי:</b><br><br>{response.text}</div>', unsafe_allow_html=True)
                     else:
                         st.error(f"אירעה שגיאה בחיבור: {last_error}")
 
