@@ -33,6 +33,7 @@ st.markdown("""
 
         /* כותרת הטופס */
         .form-header {
+            font-family: 'Assistant', sans-serif !important;
             font-size: 2rem;
             font-weight: 800;
             color: #1e293b;
