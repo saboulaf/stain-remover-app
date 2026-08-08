@@ -151,7 +151,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # כותרת הטופס
-st.markdown('<div class="form-header">🧺 פרטי הכתם והבד</div>', unsafe_allow_html=True)
+st.markdown('<div class="form-header">אפליקציה חכמה להסרת כתמים מבקדים</div>', unsafe_allow_html=True)
 
 # טעינת מפתח API
 API_KEY = st.secrets.get("GEMINI_API_KEY", "")
