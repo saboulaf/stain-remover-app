@@ -2,124 +2,198 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-# הגדרת עיצוב הדף
+# הגדרת דף - עיצוב כללי
 st.set_page_config(page_title="מסיר הכתמים החכם", page_icon="🧺", layout="centered")
 
-# --- הגדרת תמיכה מלאה ב-RTL והסרת כל סרגלי הכלים של Streamlit ---
+# --- CSS מותאם אישית להשגת העיצוב המבוקש ---
 st.markdown("""
     <style>
-        /* --- הסרת סרגלי הכלים של Streamlit --- */
-        
-        /* הסתרת הסרגל העליון (Header כולל תפריט ה-3 נקודות וכפתור Deploy) */
-        [data-testid="stHeader"] {
+        /* יבוא פונט Heebo הנקי מ-Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap');
+
+        /* הגדרות כלליות ורקע הדף */
+        html, body, .stApp {
+            font-family: 'Heebo', sans-serif !important;
+            background-color: #f4f6f8 !important;
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* הסרת סרגלי הכלים הדיפולטיביים של Streamlit */
+        [data-testid="stHeader"], footer {
             display: none !important;
         }
-        
-        /* הסתרת השוליים התחתונים והקישור Made with Streamlit */
-        footer {
-            visibility: hidden !important;
-            display: none !important;
-        }
-        
-        /* צמצום המרווח העליון שנוצר עקב הסרת הסרגל */
+
+        /* הגדרת המכולה הראשית */
         .block-container {
-            padding-top: 2rem !important;
+            padding-top: 0rem !important;
+            padding-bottom: 3rem !important;
+            max-width: 700px;
         }
 
-        /* --- עיצוב מימין לשמאל (RTL) --- */
+        /* --- באנר עליון ירוק (כמו בתמונה) --- */
+        .top-header {
+            background-color: #009661;
+            color: white;
+            padding: 35px 20px 25px 20px;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin-left: -1rem;
+            margin-right: -1rem;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 150, 97, 0.2);
+        }
+        .top-header h1 {
+            color: white !important;
+            font-weight: 800 !important;
+            font-size: 2.2rem !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .top-header p {
+            color: #e0f2fe !important;
+            font-size: 1.05rem !important;
+            margin-top: 8px !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* --- כרטיסיה לבנה מעוצבת (Card Style) --- */
+        .css-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eef0f2;
+            margin-bottom: 20px;
+        }
         
-        /* כיוון כללי ויישור טקסט */
-        .stApp, .main, .block-container {
-            direction: rtl;
-            text-align: right;
-        }
-        
-        /* יישור לימין של כותרות ופסקאות */
-        h1, h2, h3, h4, h5, h6, p, div {
-            text-align: right;
-        }
-
-        /* כיוון סרגל הצד (Sidebar) */
-        section[data-testid="stSidebar"] {
-            direction: rtl;
-            text-align: right;
+        .card-title {
+            color: #111827;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* יישור שדות קלט, לשוניות ותפריטים */
-        input, textarea, .stSelectbox, div[data-baseweb="select"], div[data-baseweb="base-input"], .stTabs {
+        /* עיצוב שדות קלט ותפריטים */
+        input, textarea, .stSelectbox, div[data-baseweb="select"] {
             direction: rtl !important;
             text-align: right !important;
+            border-radius: 10px !important;
+        }
+        
+        div[data-baseweb="input"] {
+            border-radius: 10px !important;
         }
 
-        /* יישור הודעות מערכת */
-        .stAlert, div[data-baseweb="notification"] {
+        /* עיצוב לשוניות (Tabs) */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+            background-color: #f8fafc;
+            padding: 4px;
+            border-radius: 10px;
+        }
+        .stTabs [data-baseweb="tab"] {
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        /* --- כפתור ירוק בולט (כמו בתמונה) --- */
+        .stButton button[kind="primary"] {
+            background-color: #009661 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 1.2rem !important;
+            border-radius: 12px !important;
+            padding: 14px 28px !important;
+            border: none !important;
+            box-shadow: 0 4px 14px rgba(0, 150, 97, 0.3) !important;
+            width: 100% !important;
+            transition: all 0.2s ease !important;
+        }
+        .stButton button[kind="primary"]:hover {
+            background-color: #007d51 !important;
+            transform: translateY(-1px);
+        }
+
+        /* יישור הודעות ותשובות */
+        .stAlert {
             direction: rtl;
             text-align: right;
-        }
-
-        /* עיצוב כפתור ההפעלה */
-        .stButton button {
-            width: 100%;
-        }
-
-        /* יישור תוכן ה-Markdown */
-        .stMarkdown, .stMarkdown p, .stMarkdown ul, .stMarkdown li {
-            text-align: right !important;
-            direction: rtl !important;
+            border-radius: 12px;
         }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🧺 מסיר הכתמים החכם")
-st.write("צלמו את הכתם או ספרו לנו ממה הוא נוצר, וקבלו הנחיות מדויקות להסרתו!")
+# --- באנר כותרת עליון ---
+st.markdown("""
+    <div class="top-header">
+        <h1>🧺 מחשבון ומסיר הכתמים החכם</h1>
+        <p>אבחון מהיר וטיפול מדויק מבוסס AI לפי סוג הכתם והבד</p>
+    </div>
+""", unsafe_allow_html=True)
 
-# טעינת מפתח ה-API מתוך Secrets או מתיבת הקלט בסרגל הצד
+# טעינת מפתח ה-API מתוך Secrets או מתיבת הקלט
 API_KEY = st.secrets.get("GEMINI_API_KEY", "")
 if not API_KEY:
-    API_KEY = st.sidebar.text_input("הזן מפתח API של Gemini:", type="password")
+    with st.container():
+        st.markdown('<div class="css-card">', unsafe_allow_html=True)
+        API_KEY = st.text_input("🔑 הזן מפתח API של Gemini להפעלת המערכת:", type="password")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if API_KEY:
     try:
-        # ניקוי רווחים והגדרת ה-API
         genai.configure(api_key=API_KEY.strip())
 
-        st.subheader("1. פרטי הכתם")
-        stain_text = st.text_input("ממה נגרם הכתם? (לדוגמה: יין אדום, קפה, שמן):")
+        # --- כרטיסיה 1: פרטי הכתם ---
+        st.markdown('<div class="css-card">', unsafe_allow_html=True)
+        st.markdown('<div class="card-title">🧼 זיהוי הכתם והבד</div>', unsafe_allow_html=True)
+        
+        stain_text = st.text_input(
+            "ממה נגרם הכתם?", 
+            placeholder="לדוגמה: יין אדום, קפה, שמן מנוע, רוטב עגבניות..."
+        )
+        
         fabric_type = st.selectbox(
             "מאיזה בד עשוי הבגד?",
             ["כותנה", "ג'ינס", "סינתטי (פוליאסטר)", "משי / עדין", "צמר", "לא בטוח/ה"]
         )
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        st.subheader("2. תמונת הכתם (אופציונלי אך מומלץ)")
+        # --- כרטיסיה 2: צילום / העלאת תמונה ---
+        st.markdown('<div class="css-card">', unsafe_allow_html=True)
+        st.markdown('<div class="card-title">📸 תמונת הכתם (אימות ויזואלי)</div>', unsafe_allow_html=True)
         
-        # חלוקה לבלשוניות: צילום בלייב או העלאה מגלריה
         tab1, tab2 = st.tabs(["📷 צילום במצלמה", "📁 העלאה מהגלריה"])
-        
         image_file = None
 
         with tab1:
-            camera_photo = st.camera_input("צלמו את הכתם ישירות:")
+            camera_photo = st.camera_input("צלמו את הכתם מקרוב:")
             if camera_photo:
                 image_file = camera_photo
 
         with tab2:
-            uploaded_file = st.file_uploader("העלו תמונה קיימת:", type=["jpg", "jpeg", "png"])
+            uploaded_file = st.file_uploader("בחרו תמונה מהמכשיר:", type=["jpg", "jpeg", "png"])
             if uploaded_file:
                 image_file = uploaded_file
 
         image = None
         if image_file:
-            # המרה ל-RGB כדי למנוע שגיאות שקיפות
             image = Image.open(image_file).convert("RGB")
             if image_file == uploaded_file:
                 st.image(image, caption="התמונה שהועלתה", use_column_width=True)
+                
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        # לחצן הפעלה
-        if st.button("🚀 איך מנקים את זה?", type="primary"):
+        # --- כפתור הפעלה מרכזי ---
+        if st.button("🚀 חשב הוראות ניקוי", type="primary"):
             if not stain_text and not image:
                 st.warning("אנא רשמו ממה נגרם הכתם או צלמו/העלו תמונה.")
             else:
-                with st.spinner("מנתח את הכתם ומכין הוראות ניקוי..."):
+                with st.spinner("מנתח את הכתם ומכין תוכנית ניקוי..."):
                     prompt = f"""
                     אתה מומחה להסרת כתמים וכביסה.
                     המשתמש מבקש עזרה בהסרת כתם.
@@ -141,7 +215,6 @@ if API_KEY:
                     if image:
                         inputs.append(image)
                     
-                    # רשימת מודלים עדכניים
                     candidate_models = [
                         'gemini-2.0-flash',
                         'gemini-1.5-flash-latest',
@@ -174,12 +247,13 @@ if API_KEY:
                             continue
 
                     if response:
-                        st.success("הנה מה שצריך לעשות:")
+                        # --- כרטיסיית תוצאה מעוצבת ---
+                        st.markdown('<div class="css-card">', unsafe_allow_html=True)
+                        st.markdown('<div class="card-title" style="color: #009661;">✨ הנחיות הטיפול וההסרה</div>', unsafe_allow_html=True)
                         st.markdown(f"<div style='direction: rtl; text-align: right;'>{response.text}</div>", unsafe_allow_html=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
                     else:
                         st.error(f"לא ניתן היה להתחבר למודלים. שגיאה אחרונה: {last_error}")
 
     except Exception as e:
         st.error(f"אירעה שגיאה בחיבור ל-AI: {e}")
-else:
-    st.info("כדי להפעיל את האפליקציה, יש להזין מפתח Google Gemini API בסרגל הצד (או להגדיר ב-Secrets).")
