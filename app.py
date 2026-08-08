@@ -6,59 +6,62 @@ st.set_page_config(page_title="מסיר הכתמים החכם", page_icon="🧺"
 
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&display=swap');
 
         html, body, .stApp {
-            font-family: 'Rubik', sans-serif !important;
-            background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%) !important;
+            font-family: 'Assistant', sans-serif !important;
+            background-color: #0b0f19 !important;
+            color: #f1f5f9 !important;
             direction: rtl;
             text-align: right;
         }
 
         [data-testid="stHeader"], footer { display: none !important; }
-        .block-container { padding-top: 1rem !important; max-width: 680px; }
+        .block-container { padding-top: 1.5rem !important; max-width: 680px; }
 
-        /* באנר עם גרדיאנט כחול-ים */
+        /* כותרת כהה ומודרנית */
         .top-header {
-            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-            color: white;
-            padding: 30px 20px;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            padding: 25px;
             text-align: center;
-            border-radius: 24px;
+            border-radius: 16px;
             margin-bottom: 25px;
-            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.25);
         }
-        .top-header h1 { color: white !important; font-weight: 700 !important; font-size: 2.1rem !important; margin: 0 !important; }
-        .top-header p { color: #e0f2fe !important; font-size: 1rem !important; margin-top: 6px !important; }
+        .top-header h1 { color: #38bdf8 !important; font-weight: 800 !important; font-size: 2.2rem !important; margin: 0 !important; }
+        .top-header p { color: #94a3b8 !important; font-size: 1rem !important; margin-top: 4px !important; }
 
-        /* כרטיסיות עגולות ורכות */
+        /* כרטיסיות כהות עם מסגרת עדינה */
         .css-card {
-            background-color: #ffffff;
-            border-radius: 20px;
+            background-color: #1e293b;
+            border-radius: 16px;
             padding: 22px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-            border: 1px solid #bae6fd;
+            border: 1px solid #334155;
             margin-bottom: 20px;
         }
-        .card-title { color: #0369a1; font-weight: 700; font-size: 1.2rem; margin-bottom: 15px; }
+        .card-title { color: #38bdf8; font-weight: 700; font-size: 1.2rem; margin-bottom: 15px; }
 
+        /* התאמת אלמנטים למצב לילה */
         input, textarea, .stSelectbox, div[data-baseweb="select"] {
-            direction: rtl !important; text-align: right !important; border-radius: 12px !important;
+            direction: rtl !important; text-align: right !important;
+            background-color: #0f172a !important; color: #f8fafc !important;
+            border: 1px solid #334155 !important; border-radius: 10px !important;
         }
 
         .stButton button[kind="primary"] {
-            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+            background-color: #0284c7 !important;
             color: #ffffff !important; font-weight: 700 !important; font-size: 1.15rem !important;
-            border-radius: 14px !important; padding: 14px !important; border: none !important;
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3) !important; width: 100% !important;
+            border-radius: 10px !important; padding: 14px !important; border: none !important;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4) !important; width: 100% !important;
         }
+        .stButton button[kind="primary"]:hover { background-color: #0369a1 !important; }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
     <div class="top-header">
         <h1>🧺 מסיר הכתמים החכם</h1>
-        <p>ניקוי מושלם ורענן בלחיצת כפתור</p>
+        <p>מערכת AI מתקדמת לזיהוי וטיפול בכתמים</p>
     </div>
 """, unsafe_allow_html=True)
 
