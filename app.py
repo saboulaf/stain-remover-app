@@ -105,33 +105,45 @@ if API_KEY:
                     if image:
                         inputs.append(image)
                     
-                    # --- זיהוי דינמי של המודלים הזמינים במפתח שלך ---
-                    available_models = [
-                        m.name for m in genai.list_models()
-                        if 'generateContent' in m.supported_generation_methods
+                    # רשימת מודלים עדכניים לפי סדר עדיפויות
+                    candidate_models = [
+                        'gemini-2.0-flash',
+                        'gemini-1.5-flash-latest',
+                        'gemini-1.5-pro-latest',
+                        'gemini-1.5-flash',
+                        'gemini-1.5-pro'
                     ]
                     
-                    # לבחור מודל נתמך
-                    chosen_model_name = None
-                    for pref in ['flash', 'pro', 'gemini']:
-                        for name in available_models:
-                            if pref in name:
-                                chosen_model_name = name
-                                break
-                        if chosen_model_name:
-                            break
-                            
-                    if not chosen_model_name and available_models:
-                        chosen_model_name = available_models[0]
+                    # הוספת מודלים נתמכים נוספים מתוך החשבון
+                    try:
+                        for m in genai.list_models():
+                            if 'generateContent' in m.supported_generation_methods:
+                                clean_name = m.name.replace('models/', '')
+                                if clean_name not in candidate_models:
+                                    candidate_models.append(clean_name)
+                    except Exception:
+                        pass
 
-                    if chosen_model_name:
-                        model = genai.GenerativeModel(chosen_model_name)
-                        response = model.generate_content(inputs)
-                        
+                    response = None
+                    last_error = None
+
+                    # ניסיון שליחה בפועל לכל מודל - אם מודל מוחזר כ-Deprecated, הלולאה תמשיך לסיבוב הבא
+                    for model_name in candidate_models:
+                        try:
+                            model = genai.GenerativeModel(model_name)
+                            res = model.generate_content(inputs)
+                            if res and res.text:
+                                response = res
+                                break
+                        except Exception as err:
+                            last_error = err
+                            continue
+
+                    if response:
                         st.success("הנה מה שצריך לעשות:")
                         st.markdown(f"<div style='direction: rtl; text-align: right;'>{response.text}</div>", unsafe_allow_html=True)
                     else:
-                        st.error("לא נמצאו מודלים זמינים במפתח ה-API הזה. ודא שהמפתח הונפק מ-Google AI Studio.")
+                        st.error(f"לא ניתן היה להתחבר למודלים. שגיאה אחרונה: {last_error}")
 
     except Exception as e:
         st.error(f"אירעה שגיאה בחיבור ל-AI: {e}")
