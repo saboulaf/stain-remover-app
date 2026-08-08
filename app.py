@@ -31,7 +31,7 @@ st.markdown("""
             max-width: 700px;
         }
 
-        /* --- באנר עליון ירוק (כמו בתמונה) --- */
+        /* --- באנר עליון ירוק --- */
         .top-header {
             background-color: #009661;
             color: white;
@@ -58,7 +58,7 @@ st.markdown("""
             margin-bottom: 0 !important;
         }
 
-        /* --- כרטיסיה לבנה מעוצבת (Card Style) --- */
+        /* --- כרטיסיה לבנה מעוצבת --- */
         .css-card {
             background-color: #ffffff;
             border-radius: 16px;
@@ -101,7 +101,7 @@ st.markdown("""
             font-weight: 600;
         }
 
-        /* --- כפתור ירוק בולט (כמו בתמונה) --- */
+        /* --- כפתור ירוק בולט --- */
         .stButton button[kind="primary"] {
             background-color: #009661 !important;
             color: #ffffff !important;
@@ -170,10 +170,23 @@ if API_KEY:
         tab1, tab2 = st.tabs(["📷 צילום במצלמה", "📁 העלאה מהגלריה"])
         image_file = None
 
+        # ניהול מצב הפתיחה של המצלמה
+        if "show_camera" not in st.session_state:
+            st.session_state.show_camera = False
+
         with tab1:
-            camera_photo = st.camera_input("צלמו את הכתם מקרוב:")
-            if camera_photo:
-                image_file = camera_photo
+            if not st.session_state.show_camera:
+                if st.button("📸 לחץ כאן לפתיחת המצלמה"):
+                    st.session_state.show_camera = True
+                    st.rerun()
+            else:
+                camera_photo = st.camera_input("צלמו את הכתם מקרוב:")
+                if camera_photo:
+                    image_file = camera_photo
+                
+                if st.button("❌ סגור מצלמה"):
+                    st.session_state.show_camera = False
+                    st.rerun()
 
         with tab2:
             uploaded_file = st.file_uploader("בחרו תמונה מהמכשיר:", type=["jpg", "jpeg", "png"])
