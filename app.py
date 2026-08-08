@@ -218,8 +218,7 @@ if API_KEY:
         image = None
         if image_file:
             image = Image.open(image_file).convert("RGB")
-            if image_file == uploaded_file:
-                st.image(image, caption="התמונה שנבחרה", use_column_width=True)
+            st.image(image, caption="התמונה שנבחרה", use_container_width=True)
 
         # כפתור הפעלה
         if st.button("חשב הוראות ניקוי", type="primary"):
