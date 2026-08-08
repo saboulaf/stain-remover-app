@@ -5,10 +5,30 @@ from PIL import Image
 # הגדרת עיצוב הדף
 st.set_page_config(page_title="מסיר הכתמים החכם", page_icon="🧺", layout="centered")
 
-# --- הגדרת תמיכה מלאה ב-RTL (מימין לשמאל) ---
+# --- הגדרת תמיכה מלאה ב-RTL והסרת כל סרגלי הכלים של Streamlit ---
 st.markdown("""
     <style>
-        /* כיוון כללי של האפליקציה ויישור טקסט */
+        /* --- הסרת סרגלי הכלים של Streamlit --- */
+        
+        /* הסתרת הסרגל העליון (Header כולל תפריט ה-3 נקודות וכפתור Deploy) */
+        [data-testid="stHeader"] {
+            display: none !important;
+        }
+        
+        /* הסתרת השוליים התחתונים והקישור Made with Streamlit */
+        footer {
+            visibility: hidden !important;
+            display: none !important;
+        }
+        
+        /* צמצום המרווח העליון שנוצר עקב הסרת הסרגל */
+        .block-container {
+            padding-top: 2rem !important;
+        }
+
+        /* --- עיצוב מימין לשמאל (RTL) --- */
+        
+        /* כיוון כללי ויישור טקסט */
         .stApp, .main, .block-container {
             direction: rtl;
             text-align: right;
@@ -53,7 +73,7 @@ st.markdown("""
 st.title("🧺 מסיר הכתמים החכם")
 st.write("צלמו את הכתם או ספרו לנו ממה הוא נוצר, וקבלו הנחיות מדויקות להסרתו!")
 
-# טעינת מפתח ה-API מתוך Secrets או מתיבת הקלט
+# טעינת מפתח ה-API מתוך Secrets או מתיבת הקלט בסרגל הצד
 API_KEY = st.secrets.get("GEMINI_API_KEY", "")
 if not API_KEY:
     API_KEY = st.sidebar.text_input("הזן מפתח API של Gemini:", type="password")
@@ -89,7 +109,7 @@ if API_KEY:
 
         image = None
         if image_file:
-            # המרה ל-RGB כדי למנוע שגיאות שקיפות בפורמטי תמונות שונים
+            # המרה ל-RGB כדי למנוע שגיאות שקיפות
             image = Image.open(image_file).convert("RGB")
             if image_file == uploaded_file:
                 st.image(image, caption="התמונה שהועלתה", use_column_width=True)
