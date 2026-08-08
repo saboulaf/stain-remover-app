@@ -167,31 +167,19 @@ if API_KEY:
         st.markdown('<div class="css-card">', unsafe_allow_html=True)
         st.markdown('<div class="card-title">📸 תמונת הכתם (אימות ויזואלי)</div>', unsafe_allow_html=True)
         
-        tab1, tab2 = st.tabs(["📷 צילום במצלמה", "📁 העלאה מהגלריה"])
+        # ברירת המחדל הראשונה היא העלאה מהגלריה
+        tab1, tab2 = st.tabs(["📁 העלאה מהגלריה", "📷 צילום במצלמה"])
         image_file = None
 
-        # ניהול מצב הפתיחה של המצלמה
-        if "show_camera" not in st.session_state:
-            st.session_state.show_camera = False
-
         with tab1:
-            if not st.session_state.show_camera:
-                if st.button("📸 לחץ כאן לפתיחת המצלמה"):
-                    st.session_state.show_camera = True
-                    st.rerun()
-            else:
-                camera_photo = st.camera_input("צלמו את הכתם מקרוב:")
-                if camera_photo:
-                    image_file = camera_photo
-                
-                if st.button("❌ סגור מצלמה"):
-                    st.session_state.show_camera = False
-                    st.rerun()
-
-        with tab2:
             uploaded_file = st.file_uploader("בחרו תמונה מהמכשיר:", type=["jpg", "jpeg", "png"])
             if uploaded_file:
                 image_file = uploaded_file
+
+        with tab2:
+            camera_photo = st.camera_input("צלמו את הכתם מקרוב:")
+            if camera_photo:
+                image_file = camera_photo
 
         image = None
         if image_file:
