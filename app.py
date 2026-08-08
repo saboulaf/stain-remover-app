@@ -5,27 +5,52 @@ from PIL import Image
 # הגדרת עיצוב הדף
 st.set_page_config(page_title="מסיר הכתמים החכם", page_icon="🧺", layout="centered")
 
-# --- הגדרת תמיכה מימין לשמאל (RTL) באמצעות CSS ---
+# --- הגדרת תמיכה מלאה ב-RTL (מימין לשמאל) ---
 st.markdown("""
     <style>
-        /* כיוון כללי של האפליקציה */
-        .stApp, .main {
+        /* כיוון כללי של האפליקציה ויישור טקסט */
+        .stApp, .main, .block-container {
             direction: rtl;
             text-align: right;
         }
+        
+        /* יישור לימין של כותרות ופסקאות */
+        h1, h2, h3, h4, h5, h6, p, div {
+            text-align: right;
+        }
+
         /* כיוון סרגל הצד (Sidebar) */
         section[data-testid="stSidebar"] {
             direction: rtl;
             text-align: right;
         }
-        /* יישור שדות קלט וטקסטים */
-        input, textarea, div[data-baseweb="select"] {
+
+        /* יישור שדות קלט, תפריטים נפתחים (Selectbox) ותיבות טקסט */
+        input, textarea, .stSelectbox, div[data-baseweb="select"], div[data-baseweb="base-input"] {
             direction: rtl !important;
             text-align: right !important;
         }
-        /* התאמת כפתורים והודעות */
+
+        /* יישור הטיפים, הודעות שגיאה, אזהרה והצלחה לימין */
+        .stAlert, div[data-baseweb="notification"] {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        /* הזזת תפריט המשתמש למעלה ימינה */
+        .css-15tx938 {
+            float: right;
+        }
+
+        /* עיצוב כפתור ההפעלה */
         .stButton button {
             width: 100%;
+        }
+
+        /* יישור התוכן המוחזר מה-AI (Markdown) לימין */
+        .stMarkdown, .stMarkdown p, .stMarkdown ul, .stMarkdown li {
+            text-align: right !important;
+            direction: rtl !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -78,12 +103,12 @@ if API_KEY:
                     - סוג הבד: {fabric_type}
                     
                     משימותיך:
-                    1. אם צורפה תמונה, נתח אותה וודא אם הכתם נראה מתאים לגורם שתואר (או זהה אותו בעצך אם לא צוין).
+                    1. אם צורפה תמונה, נתח אותה וודא אם הכתם נראה מתאים לגורם שתואר (או זהה אותו בעצמך אם לא צוין).
                     2. ספק מדריך ברור, קצר ושלב-אחר-שלב להסרת הכתם.
                     3. פרט אילו חומרים נדרשים (חומציות, סבון כלים, אלכוהול וכו').
                     4. ציין ממה חובה להימנע כדי לא להרוס את הבד (למשל: מים חמים בכתמי דם).
                     
-                    החזר את התשובה בעברית, בפורמט מעוצב, ברור וידידותי.
+                    החזר את התשובה בעברית תקנית, בפורמט מעוצב, ברור וידידותי.
                     """
                     
                     # שליחה למודל (עם תמונה אם קיימת)
@@ -94,7 +119,8 @@ if API_KEY:
                     response = model.generate_content(inputs)
                     
                     st.success("הנה מה שצריך לעשות:")
-                    st.markdown(response.text)
+                    # עטיפת התשובה ב-DIV המאלץ כיוון RTL
+                    st.markdown(f"<div style='direction: rtl; text-align: right;'>{response.text}</div>", unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"אירעה שגיאה בחיבור ל-AI: {e}")
