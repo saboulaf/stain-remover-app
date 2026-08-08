@@ -5,20 +5,16 @@ from PIL import Image
 # הגדרת דף
 st.set_page_config(page_title="זיהוי וטיפול בכתמים", page_icon="🧺", layout="centered")
 
-# --- CSS מותאם אישית: יישור מלא מימין לשמאל (RTL) במדויק בסגנון הטופס ---
+# --- CSS מותאם אישית: RTL נקי ללא שבירת רכיבי המערכת ---
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap');
 
-        /* אכיפת כיוון מימין לשמאל ויישור לימין על כל האלמנטים בדף */
-        html, body, .stApp, .main, .block-container, div, p, span, h1, h2, h3, h4, h5, h6, input, textarea, select {
+        /* הגדרת פונט וכיוון כללי על מכולת העמוד הראשית בלבד */
+        html, body, .stApp {
             font-family: 'Assistant', sans-serif !important;
-            direction: rtl !important;
-            text-align: right !important;
-        }
-
-        /* רקע הדף */
-        .stApp {
+            direction: rtl;
+            text-align: right;
             background-color: #ffffff !important;
             color: #1e293b !important;
         }
@@ -33,6 +29,8 @@ st.markdown("""
             padding-top: 2rem !important;
             padding-bottom: 3rem !important;
             max-width: 650px;
+            direction: rtl;
+            text-align: right;
         }
 
         /* כותרת הטופס */
@@ -41,8 +39,7 @@ st.markdown("""
             font-weight: 800;
             color: #1e293b;
             margin-bottom: 25px;
-            direction: rtl !important;
-            text-align: right !important;
+            text-align: right;
         }
 
         /* תווית שדה עם כוכבית אדומה */
@@ -51,15 +48,14 @@ st.markdown("""
             font-size: 0.95rem;
             color: #334155;
             margin-bottom: 6px;
-            direction: rtl !important;
-            text-align: right !important;
+            text-align: right;
         }
         .req-asterisk {
             color: #e11d48;
             font-weight: bold;
         }
 
-        /* שדות קלט עם קו תחתון בלבד (כמו בתמונה) */
+        /* שדות קלט עם קו תחתון בלבד */
         div[data-baseweb="input"] input {
             border: none !important;
             border-bottom: 1.5px solid #64748b !important;
@@ -81,7 +77,16 @@ st.markdown("""
             text-align: right !important;
         }
 
-        /* עיצוב הלשוניות ככפתורי בחירה (Pills) מימין לשמאל */
+        /* תיקון ספציפי לרכיב העלאת הקבצים למניעת כפילות טקסט */
+        [data-testid="stFileUploader"] {
+            direction: rtl;
+            text-align: right;
+        }
+        [data-testid="stFileUploader"] section {
+            direction: ltr; /* מונע התנגשות פנימית ברכיב ה-Upload */
+        }
+
+        /* עיצוב הלשוניות ככפתורי בחירה (Pills) */
         .stTabs [data-baseweb="tab-list"] {
             gap: 10px;
             background-color: transparent;
@@ -97,7 +102,6 @@ st.markdown("""
             color: #334155;
             font-weight: 600;
             font-size: 0.95rem;
-            direction: rtl !important;
         }
         .stTabs [aria-selected="true"] {
             background-color: #f39a1e !important;
@@ -119,13 +123,12 @@ st.markdown("""
             box-shadow: 0 3px 8px rgba(243, 154, 30, 0.3) !important;
             transition: all 0.2s ease !important;
             margin-top: 15px;
-            direction: rtl !important;
         }
         .stButton button[kind="primary"]:hover {
             background-color: #e08b12 !important;
         }
 
-        /* תיבת תוצאה בסגנון תיבת ההוראות האפורה */
+        /* תיבת תוצאה בסגנון תיבת ההוראות */
         .instruction-box {
             background-color: #f1f5f9;
             border: 1px solid #94a3b8;
@@ -151,7 +154,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # כותרת הטופס
-st.markdown('<div class="form-header">אפליקציה חכמה להסרת כתמים מבקדים</div>', unsafe_allow_html=True)
+st.markdown('<div class="form-header">אפליקציה חכמה להסרת כתמים מבגדים</div>', unsafe_allow_html=True)
 
 # טעינת מפתח API
 API_KEY = st.secrets.get("GEMINI_API_KEY", "")
