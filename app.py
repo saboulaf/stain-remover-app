@@ -25,8 +25,8 @@ st.markdown("""
             text-align: right;
         }
 
-        /* יישור שדות קלט ותפריטים נפתחים */
-        input, textarea, .stSelectbox, div[data-baseweb="select"], div[data-baseweb="base-input"] {
+        /* יישור שדות קלט, לשוניות ותפריטים */
+        input, textarea, .stSelectbox, div[data-baseweb="select"], div[data-baseweb="base-input"], .stTabs {
             direction: rtl !important;
             text-align: right !important;
         }
@@ -71,17 +71,33 @@ if API_KEY:
         )
 
         st.subheader("2. תמונת הכתם (אופציונלי אך מומלץ)")
-        uploaded_file = st.file_uploader("העלו תמונה של הכתם לאימות:", type=["jpg", "jpeg", "png"])
         
-        image = None
-        if uploaded_file:
-            # המרה ל-RGB כדי למנוע שגיאות שקיפות
-            image = Image.open(uploaded_file).convert("RGB")
-            st.image(image, caption="התמונה שהועלתה", use_column_width=True)
+        # חלוקה לבלשוניות: צילום בלייב או העלאה מגלריה
+        tab1, tab2 = st.tabs(["📷 צילום במצלמה", "📁 העלאה מהגלריה"])
+        
+        image_file = None
 
+        with tab1:
+            camera_photo = st.camera_input("צלמו את הכתם ישירות:")
+            if camera_photo:
+                image_file = camera_photo
+
+        with tab2:
+            uploaded_file = st.file_uploader("העלו תמונה קיימת:", type=["jpg", "jpeg", "png"])
+            if uploaded_file:
+                image_file = uploaded_file
+
+        image = None
+        if image_file:
+            # המרה ל-RGB כדי למנוע שגיאות שקיפות בפורמטי תמונות שונים
+            image = Image.open(image_file).convert("RGB")
+            if image_file == uploaded_file:
+                st.image(image, caption="התמונה שהועלתה", use_column_width=True)
+
+        # לחצן הפעלה
         if st.button("🚀 איך מנקים את זה?", type="primary"):
             if not stain_text and not image:
-                st.warning("אנא רשמו ממה נגרם הכתם או העלו תמונה.")
+                st.warning("אנא רשמו ממה נגרם הכתם או צלמו/העלו תמונה.")
             else:
                 with st.spinner("מנתח את הכתם ומכין הוראות ניקוי..."):
                     prompt = f"""
@@ -105,7 +121,7 @@ if API_KEY:
                     if image:
                         inputs.append(image)
                     
-                    # רשימת מודלים עדכניים לפי סדר עדיפויות
+                    # רשימת מודלים עדכניים
                     candidate_models = [
                         'gemini-2.0-flash',
                         'gemini-1.5-flash-latest',
@@ -114,7 +130,6 @@ if API_KEY:
                         'gemini-1.5-pro'
                     ]
                     
-                    # הוספת מודלים נתמכים נוספים מתוך החשבון
                     try:
                         for m in genai.list_models():
                             if 'generateContent' in m.supported_generation_methods:
@@ -127,7 +142,6 @@ if API_KEY:
                     response = None
                     last_error = None
 
-                    # ניסיון שליחה בפועל לכל מודל - אם מודל מוחזר כ-Deprecated, הלולאה תמשיך לסיבוב הבא
                     for model_name in candidate_models:
                         try:
                             model = genai.GenerativeModel(model_name)
