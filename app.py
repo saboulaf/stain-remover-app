@@ -79,14 +79,14 @@ st.markdown("""
             text-align: right !important;
         }
 
-        /* יישור תפריטים נפתחים (Select Box Options) */
+        /* יישור תפריטים נפתחים */
         ul[role="listbox"] {
             direction: rtl !important;
             text-align: right !important;
         }
 
-        /* יישור רכיב העלאת הקבצים והמצלמה לימין */
-        [data-testid="stFileUploader"], [data-testid="stCameraInput"] {
+        /* יישור רכיב העלאת הקבצים לימין */
+        [data-testid="stFileUploader"] {
             direction: rtl !important;
             text-align: right !important;
         }
@@ -98,37 +98,9 @@ st.markdown("""
             flex-direction: row-reverse !important;
         }
 
-        /* שומר על הכפתור הפנימי מלהתנגש בטקסט שנוצר עקב ה-RTL */
         [data-testid="stFileUploaderDropzone"] button {
             direction: ltr !important;
             margin-left: 10px !important;
-        }
-
-        /* עיצוב הלשוניות (Tabs) - מיושרות מימין לשמאל */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 10px;
-            background-color: transparent;
-            margin-bottom: 15px;
-            direction: rtl !important;
-            justify-content: flex-start !important;
-            flex-direction: row !important;
-        }
-        .stTabs [data-baseweb="tab"] {
-            background-color: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 8px 20px;
-            color: #334155;
-            font-weight: 600;
-            font-size: 0.95rem;
-            direction: rtl !important;
-            text-align: right !important;
-        }
-        .stTabs [aria-selected="true"] {
-            background-color: #f39a1e !important;
-            border-color: #f39a1e !important;
-            color: #ffffff !important;
-            box-shadow: 0 2px 6px rgba(243, 154, 30, 0.3) !important;
         }
 
         /* כפתור ראשי בכתום בולט */
@@ -200,24 +172,13 @@ if API_KEY:
             label_visibility="collapsed"
         )
 
-        # שדה 3: אמצעי קלט תמונה
-        st.markdown('<div class="req-label" style="margin-top: 20px;"><span class="req-asterisk">*</span> בחירת אמצעי קלט תמונה</div>', unsafe_allow_html=True)
-        tab1, tab2 = st.tabs(["באמצעות העלאת קובץ", "באמצעות מצלמה"])
-        image_file = None
-
-        with tab1:
-            uploaded_file = st.file_uploader("בחירת תמונה:", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
-            if uploaded_file:
-                image_file = uploaded_file
-
-        with tab2:
-            camera_photo = st.camera_input("צילום הכתם:", label_visibility="collapsed")
-            if camera_photo:
-                image_file = camera_photo
+        # שדה 3: אמצעי קלט תמונה יחיד (צילום או העלאת קובץ)
+        st.markdown('<div class="req-label" style="margin-top: 20px;"><span class="req-asterisk">*</span> צילום או העלאת תמונה של הכתם</div>', unsafe_allow_html=True)
+        uploaded_file = st.file_uploader("בחירת תמונה:", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
         image = None
-        if image_file:
-            image = Image.open(image_file).convert("RGB")
+        if uploaded_file:
+            image = Image.open(uploaded_file).convert("RGB")
             st.image(image, caption="התמונה שנבחרה", use_container_width=True)
 
         # כפתור הפעלה
