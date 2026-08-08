@@ -36,11 +36,6 @@ st.markdown("""
             direction: rtl;
             text-align: right;
         }
-        
-        /* הזזת תפריט המשתמש למעלה ימינה */
-        .css-15tx938 {
-            float: right;
-        }
 
         /* עיצוב כפתור ההפעלה */
         .stButton button {
@@ -67,12 +62,6 @@ if API_KEY:
     try:
         # ניקוי רווחים מיותרים והגדרת המפתח
         genai.configure(api_key=API_KEY.strip())
-        
-        # הגדרת המודל - ניסיון שימוש במודל העדכני, עם גיבוי במקרה של שגיאת התחברות
-        try:
-            model = genai.GenerativeModel('gemini-1.5-flash')
-        except Exception:
-            model = genai.GenerativeModel('gemini-1.5-pro')
 
         st.subheader("1. פרטי הכתם")
         stain_text = st.text_input("ממה נגרם הכתם? (לדוגמה: יין אדום, קפה, שמן):")
@@ -114,16 +103,37 @@ if API_KEY:
                     החזר את התשובה בעברית תקנית, בפורמט מעוצב, ברור וידידותי.
                     """
                     
-                    # שליחה למודל (עם תמונה אם קיימת)
                     inputs = [prompt]
                     if image:
                         inputs.append(image)
                     
-                    response = model.generate_content(inputs)
+                    # רשימת דגמים אפשריים - המערכת תנסה אותם אחד-אחד עד שיצליח
+                    candidate_models = [
+                        'gemini-1.5-flash',
+                        'gemini-1.5-flash-latest',
+                        'gemini-2.0-flash',
+                        'gemini-1.5-pro',
+                        'models/gemini-1.5-flash'
+                    ]
                     
-                    st.success("הנה מה שצריך לעשות:")
-                    # עטיפת התשובה ב-DIV המאלץ כיוון RTL למקרה שהמודל מחזיר טקסט מבולגן
-                    st.markdown(f"<div style='direction: rtl; text-align: right;'>{response.text}</div>", unsafe_allow_html=True)
+                    response = None
+                    last_error = None
+                    
+                    for model_name in candidate_models:
+                        try:
+                            model = genai.GenerativeModel(model_name)
+                            response = model.generate_content(inputs)
+                            if response and response.text:
+                                break
+                        except Exception as err:
+                            last_error = err
+                            continue
+                    
+                    if response:
+                        st.success("הנה מה שצריך לעשות:")
+                        st.markdown(f"<div style='direction: rtl; text-align: right;'>{response.text}</div>", unsafe_allow_html=True)
+                    else:
+                        st.error(f"אירעה שגיאה בחיבור למודלים. פרטים: {last_error}")
 
     except Exception as e:
         st.error(f"אירעה שגיאה בחיבור ל-AI: {e}")
