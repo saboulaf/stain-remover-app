@@ -5,18 +5,22 @@ from PIL import Image
 # הגדרת דף
 st.set_page_config(page_title="זיהוי וטיפול בכתמים", page_icon="🧺", layout="centered")
 
-# --- CSS מותאם אישית במדויק לפי צילום המסך ---
+# --- CSS מותאם אישית: יישור מלא מימין לשמאל (RTL) במדויק בסגנון הטופס ---
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap');
 
-        /* רקע לבן נקי ופונט */
-        html, body, .stApp {
+        /* אכיפת כיוון מימין לשמאל ויישור לימין על כל האלמנטים בדף */
+        html, body, .stApp, .main, .block-container, div, p, span, h1, h2, h3, h4, h5, h6, input, textarea, select {
             font-family: 'Assistant', sans-serif !important;
+            direction: rtl !important;
+            text-align: right !important;
+        }
+
+        /* רקע הדף */
+        .stApp {
             background-color: #ffffff !important;
             color: #1e293b !important;
-            direction: rtl;
-            text-align: right;
         }
 
         /* הסרת סרגלי הכלים של Streamlit */
@@ -31,24 +35,24 @@ st.markdown("""
             max-width: 650px;
         }
 
-        /* כותרת טופס ראשית (בדומה ל"פרטי הזדהות") */
+        /* כותרת הטופס */
         .form-header {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
             font-size: 1.3rem;
             font-weight: 800;
             color: #1e293b;
             margin-bottom: 25px;
+            direction: rtl !important;
+            text-align: right !important;
         }
 
-        /* סגנון לייבלים עם כוכבית אדומה */
+        /* תווית שדה עם כוכבית אדומה */
         .req-label {
             font-weight: 600;
             font-size: 0.95rem;
             color: #334155;
             margin-bottom: 6px;
+            direction: rtl !important;
+            text-align: right !important;
         }
         .req-asterisk {
             color: #e11d48;
@@ -63,6 +67,8 @@ st.markdown("""
             background-color: transparent !important;
             padding-right: 0px !important;
             box-shadow: none !important;
+            direction: rtl !important;
+            text-align: right !important;
         }
 
         div[data-baseweb="select"] {
@@ -71,13 +77,17 @@ st.markdown("""
             border-radius: 0px !important;
             background-color: transparent !important;
             box-shadow: none !important;
+            direction: rtl !important;
+            text-align: right !important;
         }
 
-        /* עיצוב הלשוניות כפתורי בחירה (Pills) כמו בתמונה */
+        /* עיצוב הלשוניות ככפתורי בחירה (Pills) מימין לשמאל */
         .stTabs [data-baseweb="tab-list"] {
             gap: 10px;
             background-color: transparent;
             margin-bottom: 15px;
+            direction: rtl !important;
+            justify-content: flex-start !important;
         }
         .stTabs [data-baseweb="tab"] {
             background-color: #ffffff;
@@ -87,6 +97,7 @@ st.markdown("""
             color: #334155;
             font-weight: 600;
             font-size: 0.95rem;
+            direction: rtl !important;
         }
         .stTabs [aria-selected="true"] {
             background-color: #f39a1e !important;
@@ -108,12 +119,13 @@ st.markdown("""
             box-shadow: 0 3px 8px rgba(243, 154, 30, 0.3) !important;
             transition: all 0.2s ease !important;
             margin-top: 15px;
+            direction: rtl !important;
         }
         .stButton button[kind="primary"]:hover {
             background-color: #e08b12 !important;
         }
 
-        /* תיבת תוצאה בסגנון תיבת ההוראות האפורה מהתמונה */
+        /* תיבת תוצאה בסגנון תיבת ההוראות האפורה */
         .instruction-box {
             background-color: #f1f5f9;
             border: 1px solid #94a3b8;
@@ -125,17 +137,20 @@ st.markdown("""
             max-height: 350px;
             overflow-y: auto;
             margin-top: 20px;
+            direction: rtl !important;
+            text-align: right !important;
+            white-space: pre-wrap;
         }
 
         .stAlert {
-            direction: rtl;
-            text-align: right;
+            direction: rtl !important;
+            text-align: right !important;
             border-radius: 8px;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# כותרת סגנון "פרטי הזדהות"
+# כותרת הטופס
 st.markdown('<div class="form-header">🧺 פרטי הכתם והבד</div>', unsafe_allow_html=True)
 
 # טעינת מפתח API
@@ -159,7 +174,7 @@ if API_KEY:
             label_visibility="collapsed"
         )
 
-        # שדה 3: בחירת אמצעי צילום/העלאה (Pills כמו בתמונה)
+        # שדה 3: אמצעי קלט תמונה
         st.markdown('<div class="req-label" style="margin-top: 20px;"><span class="req-asterisk">*</span> בחירת אמצעי קלט תמונה</div>', unsafe_allow_html=True)
         tab1, tab2 = st.tabs(["באמצעות העלאת קובץ", "באמצעות מצלמה"])
         image_file = None
